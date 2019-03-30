@@ -1,0 +1,20 @@
+ARG MYSQL_VERSION=latest
+FROM mysql:${MYSQL_VERSION}
+
+LABEL maintainer="Mahmoud Zalt <mahmoud@zalt.me>"
+
+#####################################
+# Set Timezone
+#####################################
+
+ARG TZ=UTC
+ENV TZ ${TZ}
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && chown -R mysql:root /var/lib/mysql/
+
+COPY my.cnf /etc/mysql/conf.d/my.cnf
+
+CMD ["mysqld"]
+COPY docker-entrypoint-initdb.d/database-loader.sh /database-loader.sh
+RUN nohup /database-loader.sh > /dev/null 2>&1 &
+
+EXPOSE 3306
